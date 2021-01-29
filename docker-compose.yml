@@ -1,0 +1,13 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:12.1
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=rustmvc
+    volumes:
+      - /home/patrice/Working/docker/db/rustmvc:/var/lib/postgresql/data:Z
+    ports:
+      - 5432:5432
+    
