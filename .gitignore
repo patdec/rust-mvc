@@ -1,3 +1,7 @@
 /target
 
+# Emacs
 *~
+
+# Node
+web/node_modules
