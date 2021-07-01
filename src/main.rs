@@ -6,8 +6,8 @@ mod routes;
 // mod models;
 // mod schema;
 
-use actix_files::{NamedFile};
 use actix_web::{web, App, HttpServer};
+use tera::Tera;
 // use actix_web_static_files;
 // use actix_web::middleware::Logger;
 // use r2d2_postgres::{postgres::NoTls, PostgresConnectionManager};
@@ -31,8 +31,10 @@ async fn main() -> std::io::Result<()> {
     //     .expect("Failed to create pool;");
     
     HttpServer::new(move || {
+        let tera = Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/**/**")).unwrap();
         // let generated = generate();
         App::new()
+            .data(tera)
             // .wrap(Logger::default())
             // .wrap(Logger::new("%a %{User-Agent}i"))
             // .data(pool.clone())

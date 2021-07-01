@@ -1,16 +1,14 @@
-use actix_web::{ HttpResponse, Responder, Result };
-use askama::Template;
-use actix_files::NamedFile;
+use std::collections::HashMap;
 
-#[derive(Template)]
-#[template(path="frontend/hello.html")]
-struct HelloTemplate<'a> {
-    name: &'a str
-}
+use actix_web::{ web, HttpResponse, Responder, Result };
+use actix_files::{NamedFile};
 
-pub async fn hello() -> impl Responder {
-    let hello = HelloTemplate { name: "Patrice" };
-    HttpResponse::Ok().body(hello.render().unwrap())
+pub async fn hello(tmpl: web::Data<tera::Tera>, query: web::Query<HashMap<String, String>>) -> impl Responder {
+    let name = query.get("name").unwrap();
+    let mut ctx = tera::Context::new();
+    ctx.insert("name", &name.to_owned());
+    let s = tmpl.render("frontend/hello.html", &ctx).unwrap();
+    HttpResponse::Ok().body(s)
 }
 
 pub async fn error500() -> Result<NamedFile> {
