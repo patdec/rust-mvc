@@ -1,9 +1,7 @@
-use super::super::controllers;
+use super::super::handlers;
 use actix_web::web;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(
-        web::resource("/hello")
-            .route(web::get().to(controllers::frontend::hello))
-    );
+    cfg.route("/error500", web::get().to(handlers::frontend::error500))
+        .route("/hello", web::get().to(handlers::frontend::hello));
 }

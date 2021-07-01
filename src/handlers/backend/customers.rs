@@ -39,7 +39,7 @@ pub async fn create(form: web::Form<FormData>, db: web::Data<Pool>) -> HttpRespo
         first_name: &form.first_name,
         last_name: &form.last_name
     };
-    insert_into(customers).values(&new_customer).get_result(&conn).expect("Error saving new post");
+    insert_into(customers).values(&new_customer).execute(&conn); //.expect("Error saving new post");
     // log::info!("{}", res);
     HttpResponse::Found().header("Location", "/admin/customers").finish()
 }
