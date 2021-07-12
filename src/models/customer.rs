@@ -1,11 +1,12 @@
-use super::super::schema::*;
-// use crate::schema::*;
+use serde::{ Serialize };
+use crate::schema::customers;
 
-#[derive(Queryable)]
+#[derive(Queryable, Serialize)]
 pub struct Customer {
     pub id: i32,
     pub first_name: String,
-    pub last_name: String
+    pub last_name: String,
+    pub active: bool,
 }
 
 #[derive(Insertable)]
