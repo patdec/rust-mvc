@@ -9,7 +9,7 @@ mod schema;
 use actix_web::{web, App, HttpServer};
 use tera::Tera;
 // use actix_web_static_files;
-// use actix_web::middleware::Logger;
+use actix_web::middleware::Logger;
 use diesel::pg::PgConnection;
 use diesel::r2d2::{self, ConnectionManager};
 
@@ -22,17 +22,18 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let manager = ConnectionManager::<PgConnection>::new(database_url);
+    let manager = ConnectionManager::<PgConnection>::new(&database_url);
     let pool = r2d2::Pool::builder()
         .build(manager)
         .expect("Failed to create DB connection pool;");
-    
+    let tera = Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/**/**")).unwrap();
+    let tera_ref = web::Data::new(tera);
+
     HttpServer::new(move || {
-        let tera = Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/**/**")).unwrap();
         // let generated = generate();
         App::new()
-            .data(tera)
-            // .wrap(Logger::default())
+            .app_data(tera_ref.clone())
+            .wrap(Logger::default())
             // .wrap(Logger::new("%a %{User-Agent}i"))
             .data(pool.clone())
             // .service(actix_web_static_files::ResourceFiles::new(

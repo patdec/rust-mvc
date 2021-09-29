@@ -2,5 +2,11 @@
 
 {% block header %} Clients {% endblock %}
 
-{% block content %} <a href="/admin/customers/new" />Nouveau client</a> {%
-  endblock %}
+{% block content %}
+<ul>
+  {% for customer in customers %}
+  <li>{{customer.first_name}} {{customer.last_name}}</li>
+  {% endfor %}
+</ul>
+<a href="/admin/customers/new" />Nouveau client</a>
+{% endblock %}

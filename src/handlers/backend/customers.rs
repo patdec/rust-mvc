@@ -8,6 +8,8 @@ use crate::models::customer::*;
 use crate::schema::customers::dsl::*;
 use diesel::prelude::*;
 use diesel::r2d2::ConnectionManager;
+use log::{info};
+
 
 type DbPool = r2d2::Pool<ConnectionManager<PgConnection>>;
 
@@ -19,22 +21,49 @@ pub async fn index(tmpl: web::Data<tera::Tera>, pool: web::Data<DbPool> ) -> Res
         customers.limit(100).load::<Customer>(&connection)
     })
         .await
-        .map_err(|_| HttpResponse::InternalServerError().finish())?;
+        .map_err(|_| {
+            info!("ERR_CUSTOMERS");
+            HttpResponse::InternalServerError().finish()
+        })?;
 
+    info!("CUSTOMERS: {:#?}", customers_data);
     let mut ctx = tera::Context::new();
     ctx.insert("customers", &customers_data);
-    let s = tmpl.render("frontend/hello.html", &ctx).unwrap();
+    let s = tmpl.render("backend/customers/index.html", &ctx).unwrap();
     Ok(HttpResponse::Ok().body(s))
 }
 
-// #[derive(Template)]
-// #[template(path = "backend/customers/new.html")]
-// struct NewTemplate {}
+pub async fn new(tmpl: web::Data<tera::Tera>) -> Result<HttpResponse, Error> {
+    let ctx = tera::Context::new();
+    let s = tmpl.render("backend/customers/new.html", &ctx).unwrap();
+    Ok(HttpResponse::Ok().body(s))
+}
 
-// pub async fn new() -> impl Responder {
-//     let new = NewTemplate {};
-//     HttpResponse::Ok().body(new.render().unwrap())
-// }
+pub async fn create(
+    tmpl: web::Data<tera::Tera>,
+    params: web::Form<NewCustomer>,
+    pool: web::Data<DbPool>
+) -> Result<HttpResponse, Error> {
+    let connection = pool.get()
+        .expect("Can't get db connection from pool");
+
+    let customer = NewCustomer {
+        first_name: params.first_name.to_string(),
+        last_name: params.last_name.to_string()
+    };
+
+    web::block(move ||
+               diesel::insert_into(customers)
+               .values(&customer)
+               .execute(&connection)
+    )
+        .await
+        .map_err(|_| HttpResponse::InternalServerError())?;
+    
+    let ctx = tera::Context::new();
+    let s = tmpl.render("backend/customers/new.html", &ctx).unwrap();
+    Ok(HttpResponse::Ok().body(s))
+}
 
 // #[derive(Deserialize)]
 // pub struct FormData {
