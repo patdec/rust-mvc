@@ -26,7 +26,7 @@ async fn main() -> std::io::Result<()> {
     let pool = r2d2::Pool::builder()
         .build(manager)
         .expect("Failed to create DB connection pool;");
-    let tera = Tera::new(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/**/**")).unwrap();
+    let tera = Tera::new("templates/**/**").unwrap();
     let tera_ref = web::Data::new(tera);
 
     HttpServer::new(move || {
@@ -42,7 +42,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::scope("/admin").configure(routes::backend::config))
             .service(web::scope("/").configure(routes::frontend::config))
     })
-    .bind("127.0.0.1:8080")?
+    .bind("[::]:8080")?
     .run()
     .await
 }
